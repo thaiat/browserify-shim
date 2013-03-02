@@ -12,8 +12,8 @@ function inspect(obj, depth) {
 }
 
 function preValidate(browserifyInstance, configs) {
-  if (!browserifyInstance || typeof browserifyInstance.add !== 'function' || typeof browserifyInstance.transform !== 'function')
-    throw new Error('browserify-shim needs to be passed a proper browserify instance as the first argument.');
+  /*if (!browserifyInstance || typeof browserifyInstance.add !== 'function' || typeof browserifyInstance.transform !== 'function')
+    throw new Error('browserify-shim needs to be passed a proper browserify instance as the first argument.');*/
   if (!configs || typeof configs !== 'object') 
     throw new Error('browserify-shim needs to be passed a hashmap of one or more shim configs as the second argument.');
 }
@@ -76,9 +76,9 @@ function wrap(content, config) {
   return boundWindow;
 }
 
-module.exports = function shim(browserifyInstance, configs) {
-  var shims = {};
-  preValidate(browserifyInstance, configs);
+var shims = {};
+module.exports = function shim(configs) {
+  preValidate(null, configs);
 
   Object.keys(configs)
     .forEach(function (alias) {
@@ -89,11 +89,16 @@ module.exports = function shim(browserifyInstance, configs) {
       var resolvedPath = require.resolve(path.resolve(buildScriptDir, config.path));
 
       shims[resolvedPath] = config;
-      browserifyInstance.require(resolvedPath, { expose: alias });
+      config.alias = alias;
+
+      // XXX: not working b/c I can't get hold of the instance until transform gets called
+      // browserifyInstance.require(resolvedPath, { expose: config.alias });
     });
 
-  browserifyInstance.transform(function (file) {
+    return function (file) {
+      var browserifyInstance = this;
       var content = '';
+
       return through(
           function write(buf) {
             content += buf;
@@ -102,11 +107,14 @@ module.exports = function shim(browserifyInstance, configs) {
             var config = shims[file] 
               , transformed = config ? wrap(content, config) : content;
 
+            if (config) {
+              // XXX: not working because browserify never calls transform unless file was required in the first place
+              // browserifyInstance.require(file, { expose: config.alias });
+            }
+
             this.queue(transformed);
             this.queue(null);
           }
       );
-  });
-  
-  return browserifyInstance;
+    };
 };
