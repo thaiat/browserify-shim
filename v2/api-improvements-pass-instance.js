@@ -4,13 +4,18 @@ var browserify = require('browserify')
 
 // Best possible API with current browserify transform implementation
 var instance = browserify();
+
 instance.transform(
     shim(instance, { 
       jquery: { path: '../test/fixtures/shims/crippled-jquery', exports: '$' } 
     })
+    // ugly
+    .bind(instance)
   );
 
 instance
+  // uggh - needless repetition
+  .require(require.resolve('../test/fixtures/shims/crippled-jquery'), { expose: 'jquery' })
   .require(require.resolve('../test/fixtures/entry-requires-jquery.js'), { expose: 'entry' })
   .bundle(function (err, src) {
     if (err) return console.error(err);

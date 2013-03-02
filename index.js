@@ -12,8 +12,8 @@ function inspect(obj, depth) {
 }
 
 function preValidate(browserifyInstance, configs) {
-  /*if (!browserifyInstance || typeof browserifyInstance.add !== 'function' || typeof browserifyInstance.transform !== 'function')
-    throw new Error('browserify-shim needs to be passed a proper browserify instance as the first argument.');*/
+  if (!browserifyInstance || typeof browserifyInstance.add !== 'function' || typeof browserifyInstance.transform !== 'function')
+    throw new Error('browserify-shim needs to be passed a proper browserify instance as the first argument.');
   if (!configs || typeof configs !== 'object') 
     throw new Error('browserify-shim needs to be passed a hashmap of one or more shim configs as the second argument.');
 }
@@ -77,8 +77,8 @@ function wrap(content, config) {
 }
 
 var shims = {};
-module.exports = function shim(configs) {
-  preValidate(null, configs);
+module.exports = function shim(browserifyInstance, configs) {
+  preValidate(browserifyInstance, configs);
 
   Object.keys(configs)
     .forEach(function (alias) {
@@ -91,8 +91,7 @@ module.exports = function shim(configs) {
       shims[resolvedPath] = config;
       config.alias = alias;
 
-      // XXX: not working b/c I can't get hold of the instance until transform gets called
-      // browserifyInstance.require(resolvedPath, { expose: config.alias });
+      browserifyInstance.require(resolvedPath, { expose: config.alias });
     });
 
     return function (file) {
@@ -106,11 +105,6 @@ module.exports = function shim(configs) {
         , function end() {
             var config = shims[file] 
               , transformed = config ? wrap(content, config) : content;
-
-            if (config) {
-              // XXX: not working because browserify never calls transform unless file was required in the first place
-              // browserifyInstance.require(file, { expose: config.alias });
-            }
 
             this.queue(transformed);
             this.queue(null);
