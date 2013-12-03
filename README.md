@@ -1,4 +1,4 @@
-#browserify-shim [![build status](https://secure.travis-ci.org/thlorenz/browserify-shim.png?branch=master)](http://travis-ci.org/thlorenz/browserify-shim)
+#browserify-shim [![build status](https://secure.travis-ci.org/thlorenz/browserify-shim.png)](http://travis-ci.org/thlorenz/browserify-shim)
 
 ### Make CommonJS-Incompatible Files Browserifyable
 
@@ -100,6 +100,7 @@ Inside `package.json` add:
     "transform": [ "browserify-shim" ]
   }
 }
+<<<<<<< HEAD
 ```
 
 #### 3. Provide browserify-shim config
@@ -168,6 +169,76 @@ Simply set the flag when building your bundle, i.e.:
 
 or in a `build.js` script add: `process.env.BROWSERIFYSHIM_DIAGNOSTICS=1` to the top.
 
+=======
+```
+
+#### 3. Provide browserify-shim config
+
+Inside `package.json` add:
+
+```json
+{
+  "browserify-shim": {
+    "./js/vendor/jquery.js": "$"
+  }
+}
+```
+
+The above includes `./js/vendor/jquery.js` (relative to the `package.json`) in the bundle and exports `window.$`.
+
+##### Short Form vs. Long Form config
+
+Since `jquery` does not depend on other shimmed modules and thus has no `depends` field, we used the short form to
+specify its exports, however the example above is equivalent to:
+
+```json
+{
+  "browserify-shim": {
+    "./js/vendor/jquery.js": { "exports": "$" }
+  }
+}
+```
+
+### You will sometimes
+
+#### Use aliases
+
+You may expose files under a different name via the [`browser` field](https://gist.github.com/defunctzombie/4339901#replace-specific-files---advanced) and refer to them under that alias in the shim config:
+
+```json
+{
+  "browser": {
+    "jquery": "./js/vendor/jquery.js"
+  },
+  "browserify-shim": {
+    "jquery": "$"
+  }
+}
+```
+
+This also allows you to require this module under the alias, i.e.: `var $ = require('jquery')`.
+
+#### Provide an external shim config
+
+```json
+"browserify-shim": "./config/shim.js"
+```
+
+The external shim format is very similar to the way in which the shim is specified inside the `package.json`. See
+[below](#c-config-inside-configshimjs-without-aliases) for more details.
+
+#### Diagnose what browserify-shim is doing
+
+You may encounter problems when your shim config isn't properly setup. In that case you can diagnose them via the
+`BROWSERIFYSHIM_DIAGNOSTICS` flag.
+
+Simply set the flag when building your bundle, i.e.: 
+
+    BROWSERIFYSHIM_DIAGNOSTICS=1 browserify -d . -o js/bundle.js
+
+or in a `build.js` script add: `process.env.BROWSERIFYSHIM_DIAGNOSTICS=1` to the top.
+
+>>>>>>> 7128b3aa96fb717887692d6790a67d95738deb42
 ## Multi Shim Example including dependencies
 
 Some libraries depend on other libraries to have attached their exports to the window for historical reasons :(.
