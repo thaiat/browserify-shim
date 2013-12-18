@@ -1,7 +1,6 @@
 'use strict';
 
 var util         =  require('util')
-  , resolve      =  require('resolve')
   , format       =  require('util').format
   , path         =  require('path')
   , through      =  require('through')
@@ -14,7 +13,10 @@ function requireDependencies(depends, packageRoot, browserAliases, dependencies)
 
   return Object.keys(depends)
     .map(function (k) { 
-      // resolve aliases to full paths to avoid conflicts when require is injected into a file
+
+      return { alias: k, exports: depends[k] || null }; 
+
+      /*// resolve aliases to full paths to avoid conflicts when require is injected into a file
       // inside another package, i.e. the it's shim was defined in a package.json one level higher
       // aliases don't get resolved by browserify in that case, since it only looks in the package.json next to it
       var browserAlias = browserAliases && browserAliases[k]
@@ -30,8 +32,7 @@ function requireDependencies(depends, packageRoot, browserAliases, dependencies)
 
           // lets hope for the best that browserify will be able to resolve this, cause we can't
           : k;
-
-      return { alias: alias, exports: depends[k] || null }; 
+*/
     })
     .reduce(
       function (acc, dep) {
