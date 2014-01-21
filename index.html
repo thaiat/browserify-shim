@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=640" />
+
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen"/>
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)"/>
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
+    <title>Browserify-shim by thlorenz</title>
+  </head>
+
+  <body>
+    <a id="forkme_banner" href="https://github.com/thlorenz/browserify-shim">View on GitHub</a>
+    <div class="shell">
+
+      <header>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Browserify-shim</h1>
+            <h2>Makes CommonJS incompatible files browserifyable.</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+      </header>
+
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/thlorenz/browserify-shim/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/thlorenz/browserify-shim/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
+
+
+      <span class="banner-fix"></span>
+
+
+      <section id="main_content">
+        <h1>
+<a name="browserify-shim-" class="anchor" href="#browserify-shim-"><span class="octicon octicon-link"></span></a>browserify-shim <a href="http://travis-ci.org/thlorenz/browserify-shim"><img src="https://secure.travis-ci.org/thlorenz/browserify-shim.png?branch=master" alt="build status"></a>
+</h1>
+
+<p><a href="https://nodei.co/npm/browserify-shim/"><img src="https://nodei.co/npm/browserify-shim.png?downloads=true&amp;stars=true" alt="NPM"></a></p>
+
+<h3>
+<a name="make-commonjs-incompatible-files-browserifyable" class="anchor" href="#make-commonjs-incompatible-files-browserifyable"><span class="octicon octicon-link"></span></a>Make CommonJS-Incompatible Files Browserifyable</h3>
+
+<h4>
+<a name="packagejson" class="anchor" href="#packagejson"><span class="octicon octicon-link"></span></a>package.json</h4>
+
+<div class="highlight highlight-json"><pre><span class="p">{</span>
+  <span class="nt">"main"</span><span class="p">:</span> <span class="s2">"./js/entry.js"</span><span class="p">,</span>
+  <span class="nt">"browser"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"jquery"</span><span class="p">:</span> <span class="s2">"./js/vendor/jquery.js"</span>
+  <span class="p">},</span>
+  <span class="nt">"browserify-shim"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"jquery"</span><span class="p">:</span> <span class="s2">"$"</span><span class="p">,</span>
+    <span class="nt">"three"</span><span class="p">:</span> <span class="s2">"global:THREE"</span>
+  <span class="p">},</span>
+  <span class="nt">"browserify"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"transform"</span><span class="p">:</span> <span class="p">[</span> <span class="s2">"browserify-shim"</span> <span class="p">]</span>
+  <span class="p">},</span>
+  <span class="nt">"dependencies"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"browserify-shim"</span><span class="p">:</span> <span class="s2">"~3.2.0"</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<pre><code>browserify . -d -o bundle.js
+</code></pre>
+
+<p><strong>Table of Contents</strong>  <em>generated with <a href="http://doctoc.herokuapp.com/">DocToc</a></em></p>
+
+<ul>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#features">Features</a></li>
+<li>
+<a href="#api">API</a>
+
+<ul>
+<li>
+<a href="#you-will-always">You Will Always</a>
+
+<ul>
+<li><a href="#1-install-browserify-shim-dependency">1. Install browserify-shim dependency</a></li>
+<li><a href="#2-register-browserify-shim-as-a-transform-with-browserify">2. Register browserify-shim as a transform with browserify</a></li>
+<li>
+<a href="#3-provide-browserify-shim-config">3. Provide browserify-shim config</a>
+
+<ul>
+<li><a href="#short-form-vs-long-form-config">Short Form vs. Long Form config</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="#you-will-sometimes">You will sometimes</a>
+
+<ul>
+<li>
+<a href="#a-expose-global-variables-via-global">a) Expose global variables via <code>global:*</code></a>
+
+<ul>
+<li><a href="#1-add-script-tag-for-library-you-want-to-expose">1. add script tag for library you want to expose</a></li>
+<li><a href="#2-add-expose-global-config-to-packagejson">2. Add expose global config to <code>package.json</code></a></li>
+<li><a href="#3-require-library-by-the-name-it-was-exposed-as">3. Require library by the name it was exposed as</a></li>
+<li><a href="#why-not-just-var-three-=-windowthree">Why not just <code>var THREE = window.THREE</code>?</a></li>
+</ul>
+</li>
+<li><a href="#b-use-aliases">b) Use aliases</a></li>
+<li><a href="#c-provide-an-external-shim-config">c) Provide an external shim config</a></li>
+<li><a href="#d-diagnose-what-browserify-shim-is-doing">d) Diagnose what browserify-shim is doing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="#multi-shim-example-including-dependencies">Multi Shim Example including dependencies</a>
+
+<ul>
+<li><a href="#a-config-inside-packagejson-without-aliases">a) Config inside <code>package.json</code> without aliases</a></li>
+<li><a href="#b-config-inside-packagejson-with-aliases">b) Config inside <code>package.json</code> with aliases</a></li>
+<li>
+<a href="#c-config-inside-configshimjs-without-aliases">c) Config inside <code>./config/shim.js</code> without aliases</a>
+
+<ul>
+<li><a href="#packagejson"><code>package.json</code></a></li>
+<li><a href="#shimjs"><code>shim.js</code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#more-examples">More Examples</a></li>
+</ul><h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<pre><code>npm install browserify-shim
+</code></pre>
+
+<p><em>For a version compatible with <a href="mailto:browserify@1.x">browserify@1.x</a> run <code>npm install browserify-shim@1.x</code> instead.</em></p>
+
+<p><em>For a version compatible with the <a href="https://github.com/thlorenz/browserify-shim/tree/v2#api">v2 API</a> <code>npm install browserify-shim@2.x</code> instead.</em></p>
+
+<h2>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<p>The core features of browserify-shim are:</p>
+
+<ul>
+<li>Shims <strong>non-CommonJS</strong> modules in order for them to be <strong>browserified</strong> by specifying an alias, the path to the file,
+and the identifier under which the module attaches itself to the global <code>window</code> object.</li>
+<li>Includes <code>depends</code> for  shimming libraries that depend on other libraries being in the global namespace.</li>
+<li>applies shims configured inside the dependencies of your package</li>
+</ul><p>Additionally, it handles the following real-world edge cases:</p>
+
+<ul>
+<li>Modules that just declare a <code>var foo = ...</code> on the script level and assume it gets attached to the <code>window</code> object.
+Since the only way they will ever be run is in the global context — "ahem, … NO?!"</li>
+<li>Makes <code>define</code> and also <code>module</code> be <code>undefined</code>, in order to fix <a href="https://github.com/mhemesath/r2d3/blob/918bd076e4f980722438b2594d1eba53a522ce75/r2d3.v2.js#L222">improperly-authored
+libraries</a> that need
+shimming but try anyway to use AMD or CommonJS. For more info read the comment inside <a href="https://github.com/thlorenz/browserify-shim/blob/master/test/fixtures/shims/lib-with-exports-define-global-problem.js">this
+fixture</a>
+</li>
+</ul><p>Since <code>browserify-shim</code> is a proper <code>browserify</code> transform you can publish packages with files that need to be shimmed,
+granted that you specify the shim config inside the <code>package.json</code>.</p>
+
+<p>When <code>browserify</code> resolves your package it will run the <code>browserify-shim</code> transform and thus shim what's necessary
+when generating the bundle.</p>
+
+<h2>
+<a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>API</h2>
+
+<h3>
+<a name="you-will-always" class="anchor" href="#you-will-always"><span class="octicon octicon-link"></span></a>You Will Always</h3>
+
+<h4>
+<a name="1-install-browserify-shim-dependency" class="anchor" href="#1-install-browserify-shim-dependency"><span class="octicon octicon-link"></span></a>1. Install browserify-shim dependency</h4>
+
+<p>In most cases you want to install it as a <a href="https://npmjs.org/doc/json.html#devDependencies">devDependency</a> via:</p>
+
+<pre><code>npm install -D browserify-shim
+</code></pre>
+
+<h4>
+<a name="2-register-browserify-shim-as-a-transform-with-browserify" class="anchor" href="#2-register-browserify-shim-as-a-transform-with-browserify"><span class="octicon octicon-link"></span></a>2. Register browserify-shim as a transform with browserify</h4>
+
+<p>Inside <code>package.json</code> add:</p>
+
+<div class="highlight highlight-json"><pre><span class="p">{</span> 
+  <span class="nt">"browserify"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"transform"</span><span class="p">:</span> <span class="p">[</span> <span class="s2">"browserify-shim"</span> <span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<h4>
+<a name="3-provide-browserify-shim-config" class="anchor" href="#3-provide-browserify-shim-config"><span class="octicon octicon-link"></span></a>3. Provide browserify-shim config</h4>
+
+<p>Inside <code>package.json</code> add:</p>
+
+<div class="highlight highlight-json"><pre><span class="p">{</span>
+  <span class="nt">"browserify-shim"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"./js/vendor/jquery.js"</span><span class="p">:</span> <span class="s2">"$"</span><span class="p">,</span>
+    <span class="nt">"three"</span><span class="p">:</span> <span class="s2">"global:THREE"</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>The above includes <code>./js/vendor/jquery.js</code> (relative to the <code>package.json</code>) in the bundle and exports <code>window.$</code>.</p>
+
+<p>Additionally it exposes <code>window.THREE</code> as <code>three</code>, so you can <code>var three = require('three')</code>. More info
+<a href="#a-expose-global-variables-via-global">below</a>.</p>
+
+<h5>
+<a name="short-form-vs-long-form-config" class="anchor" href="#short-form-vs-long-form-config"><span class="octicon octicon-link"></span></a>Short Form vs. Long Form config</h5>
+
+<p>Since <code>jquery</code> does not depend on other shimmed modules and thus has no <code>depends</code> field, we used the short form to
+specify its exports, however the example above is equivalent to:</p>
+
+<div class="highlight highlight-json"><pre><span class="p">{</span>
+  <span class="nt">"browserify-shim"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"./js/vendor/jquery.js"</span><span class="p">:</span> <span class="p">{</span> <span class="nt">"exports"</span><span class="p">:</span> <span class="s2">"$"</span> <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>
+<a name="you-will-sometimes" class="anchor" href="#you-will-sometimes"><span class="octicon octicon-link"></span></a>You will sometimes</h3>
+
+<h4>
+<a name="a-expose-global-variables-via-global" class="anchor" href="#a-expose-global-variables-via-global"><span class="octicon octicon-link"></span></a>a) Expose global variables via <code>global:*</code>
+</h4>
+
+<p>In some cases the libraries you are using are very large and you'd prefer to add them via a script tag instead to get
+the following benefits:</p>
+
+<ul>
+<li>faster bundling times since the library is not included in the bundle</li>
+<li>pull libraries from a <a href="http://en.wikipedia.org/wiki/Content_delivery_network">CDN</a> which allows it to be pulled
+straight from the user's browser cache in case it was downloaded before</li>
+</ul><p>We'll show how this works by taking the rather huge yet awesome <code>THREE.js</code> library as an example:</p>
+
+<h5>
+<a name="1-add-script-tag-for-library-you-want-to-expose" class="anchor" href="#1-add-script-tag-for-library-you-want-to-expose"><span class="octicon octicon-link"></span></a>1. add script tag for library you want to expose</h5>
+
+<div class="highlight highlight-html"><pre><span class="c">&lt;!-- index.html --&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+  <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">utf-8</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"http://cdnjs.cloudflare.com/ajax/libs/three.js/r61/three.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+</pre></div>
+
+<h5>
+<a name="2-add-expose-global-config-to-packagejson" class="anchor" href="#2-add-expose-global-config-to-packagejson"><span class="octicon octicon-link"></span></a>2. Add expose global config to <code>package.json</code>
+</h5>
+
+<div class="highlight highlight-json"><pre><span class="p">{</span>
+  <span class="nt">"browserify-shim"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"three"</span><span class="p">:</span> <span class="s2">"global:THREE"</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p><strong>Note:</strong> <code>THREE.js</code> attaches <code>window.THREE</code>.</p>
+
+<h5>
+<a name="3-require-library-by-the-name-it-was-exposed-as" class="anchor" href="#3-require-library-by-the-name-it-was-exposed-as"><span class="octicon octicon-link"></span></a>3. Require library by the name it was exposed as</h5>
+
+<div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">THREE</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'three'</span><span class="p">);</span>
+</pre></div>
+
+<h5>
+<a name="why-not-just-var-three--windowthree" class="anchor" href="#why-not-just-var-three--windowthree"><span class="octicon octicon-link"></span></a>Why not just <code>var THREE = window.THREE</code>?</h5>
+
+<p>You want to avoid spreading the knowledge that <code>THREE</code> is a global and stay consistent in how you resolve dependencies.
+Additionally if <code>THREE</code> would ever be published to <a href="https://npmjs.org/">npm</a> and you decide to install it from there,
+you don't have to change any of your code since it already is <code>require</code>ing it properly.</p>
+
+<h4>
+<a name="b-use-aliases" class="anchor" href="#b-use-aliases"><span class="octicon octicon-link"></span></a>b) Use aliases</h4>
+
+<p>You may expose files under a different name via the <a href="https://gist.github.com/defunctzombie/4339901#replace-specific-files---advanced"><code>browser</code> field</a> and refer to them under that alias in the shim config:</p>
+
+<div class="highlight highlight-json"><pre><span class="p">{</span>
+  <span class="nt">"browser"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"jquery"</span><span class="p">:</span> <span class="s2">"./js/vendor/jquery.js"</span>
+  <span class="p">},</span>
+  <span class="nt">"browserify-shim"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"jquery"</span><span class="p">:</span> <span class="s2">"$"</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>This also allows you to require this module under the alias, i.e.: <code>var $ = require('jquery')</code>.</p>
+
+<h4>
+<a name="c-provide-an-external-shim-config" class="anchor" href="#c-provide-an-external-shim-config"><span class="octicon octicon-link"></span></a>c) Provide an external shim config</h4>
+
+<div class="highlight highlight-json"><pre><span class="p">{</span>
+  <span class="nt">"browserify-shim"</span><span class="p">:</span> <span class="s2">"./config/shim.js"</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>The external shim format is very similar to the way in which the shim is specified inside the <code>package.json</code>. See
+<a href="#c-config-inside-configshimjs-without-aliases">below</a> for more details.</p>
+
+<h4>
+<a name="d-diagnose-what-browserify-shim-is-doing" class="anchor" href="#d-diagnose-what-browserify-shim-is-doing"><span class="octicon octicon-link"></span></a>d) Diagnose what browserify-shim is doing</h4>
+
+<p>You may encounter problems when your shim config isn't properly setup. In that case you can diagnose them via the
+<code>BROWSERIFYSHIM_DIAGNOSTICS</code> flag.</p>
+
+<p>Simply set the flag when building your bundle, i.e.: </p>
+
+<pre><code>BROWSERIFYSHIM_DIAGNOSTICS=1 browserify -d . -o js/bundle.js
+</code></pre>
+
+<p>or in a <code>build.js</code> script add: <code>process.env.BROWSERIFYSHIM_DIAGNOSTICS=1</code> to the top.</p>
+
+<h2>
+<a name="multi-shim-example-including-dependencies" class="anchor" href="#multi-shim-example-including-dependencies"><span class="octicon octicon-link"></span></a>Multi Shim Example including dependencies</h2>
+
+<p>Some libraries depend on other libraries to have attached their exports to the window for historical reasons :(.
+(Hopefully soon we can truly say that this bad design is history.)</p>
+
+<p>In this contrived example we are shimming four libraries since none of them are commonJS compatible:</p>
+
+<ul>
+<li>
+<strong>x</strong> exports <strong>window.$</strong>
+</li>
+<li>
+<strong>x-ui</strong> exports nothing since it just <strong>attaches itself to x</strong>. Therefore x-ui depends on x.</li>
+<li>
+<strong>y</strong> exports <strong>window.Y</strong> and also <strong>depends on x</strong> expecting to find it on the window as $.</li>
+<li>
+<strong>z</strong> exports <strong>window.zorro</strong> and <strong>depends on x and y</strong>. It expects to find x on the window as $, but y on the window as YNOT, 
+which is actually different than the name under which y exports itself.</li>
+</ul><p>We will be using the <code>depends</code> field in order to ensure that a dependency is included and initialized before a library
+that depends on it is initialized.</p>
+
+<p>Below are three examples, each showing a way to properly shim the above mentioned modules.</p>
+
+<h3>
+<a name="a-config-inside-packagejson-without-aliases" class="anchor" href="#a-config-inside-packagejson-without-aliases"><span class="octicon octicon-link"></span></a>a) Config inside <code>package.json</code> without aliases</h3>
+
+<div class="highlight highlight-json"><pre><span class="p">{</span>
+  <span class="nt">"browserify"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"transform"</span><span class="p">:</span> <span class="p">[</span> <span class="s2">"browserify-shim"</span> <span class="p">]</span>
+  <span class="p">},</span>
+  <span class="nt">"browserify-shim"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"./vendor/x.js"</span>    <span class="p">:</span>  <span class="s2">"$"</span><span class="p">,</span>
+    <span class="nt">"./vendor/x-ui.js"</span> <span class="p">:</span>  <span class="p">{</span> <span class="nt">"depends"</span><span class="p">:</span> <span class="p">[</span> <span class="s2">"./vendor/x.js"</span> <span class="p">]</span> <span class="p">},</span>
+    <span class="nt">"./vendor/y.js"</span>    <span class="p">:</span>  <span class="p">{</span> <span class="nt">"exports"</span><span class="p">:</span> <span class="s2">"Y"</span><span class="p">,</span> <span class="nt">"depends"</span><span class="p">:</span> <span class="p">[</span> <span class="s2">"./vendor/x.js:$"</span> <span class="p">]</span> <span class="p">},</span>
+    <span class="nt">"./vendor/z.js"</span>    <span class="p">:</span>  <span class="p">{</span> <span class="nt">"exports"</span><span class="p">:</span> <span class="s2">"zorro"</span><span class="p">,</span> <span class="nt">"depends"</span><span class="p">:</span> <span class="p">[</span> <span class="s2">"./vendor/x.js:$"</span><span class="p">,</span> <span class="s2">"./vendor/y.js:YNOT"</span> <span class="p">]</span> <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p><strong>Note:</strong> the <code>depends</code> array consists of entries of the format <code>path-to-file:export</code></p>
+
+<h3>
+<a name="b-config-inside-packagejson-with-aliases" class="anchor" href="#b-config-inside-packagejson-with-aliases"><span class="octicon octicon-link"></span></a>b) Config inside <code>package.json</code> with aliases</h3>
+
+<div class="highlight highlight-json"><pre><span class="p">{</span>
+  <span class="nt">"browserify"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"transform"</span><span class="p">:</span> <span class="p">[</span> <span class="s2">"browserify-shim"</span> <span class="p">]</span>
+  <span class="p">},</span>
+  <span class="nt">"browser"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"x"</span>    <span class="p">:</span>  <span class="s2">"./vendor/x.js"</span><span class="p">,</span>
+    <span class="nt">"x-ui"</span> <span class="p">:</span>  <span class="s2">"./vendor/x-ui.js"</span><span class="p">,</span>
+    <span class="nt">"y"</span>    <span class="p">:</span>  <span class="s2">"./vendor/y.js"</span><span class="p">,</span>
+    <span class="nt">"z"</span>    <span class="p">:</span>  <span class="s2">"./vendor/z.js"</span>
+  <span class="p">},</span>
+   <span class="nt">"browserify-shim"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"x"</span>    <span class="p">:</span>  <span class="s2">"$"</span><span class="p">,</span>
+    <span class="nt">"x-ui"</span> <span class="p">:</span>  <span class="p">{</span> <span class="nt">"depends"</span><span class="p">:</span> <span class="p">[</span> <span class="s2">"x"</span> <span class="p">]</span> <span class="p">},</span>
+    <span class="nt">"y"</span>    <span class="p">:</span>  <span class="p">{</span> <span class="nt">"exports"</span><span class="p">:</span> <span class="s2">"Y"</span><span class="p">,</span> <span class="nt">"depends"</span><span class="p">:</span> <span class="p">[</span> <span class="s2">"x:$"</span> <span class="p">]</span> <span class="p">},</span>
+    <span class="nt">"z"</span>    <span class="p">:</span>  <span class="p">{</span> <span class="nt">"exports"</span><span class="p">:</span> <span class="s2">"zorro"</span><span class="p">,</span> <span class="nt">"depends"</span><span class="p">:</span> <span class="p">[</span> <span class="s2">"x:$"</span><span class="p">,</span> <span class="s2">"y:YNOT"</span> <span class="p">]</span> <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p><strong>Note:</strong> the <code>depends</code> entries make use of the aliases as well <code>alias:export</code></p>
+
+<h3>
+<a name="c-config-inside-configshimjs-without-aliases" class="anchor" href="#c-config-inside-configshimjs-without-aliases"><span class="octicon octicon-link"></span></a>c) Config inside <code>./config/shim.js</code> without aliases</h3>
+
+<h4>
+<a name="packagejson-1" class="anchor" href="#packagejson-1"><span class="octicon octicon-link"></span></a><code>package.json</code>
+</h4>
+
+<div class="highlight highlight-json"><pre><span class="p">{</span>
+  <span class="nt">"browserify"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">"transform"</span><span class="p">:</span> <span class="p">[</span> <span class="s2">"browserify-shim"</span> <span class="p">]</span>
+  <span class="p">},</span>
+  <span class="nt">"browserify-shim"</span><span class="p">:</span> <span class="s2">"./config/shim.js"</span>
+<span class="p">}</span>
+</pre></div>
+
+<h4>
+<a name="shimjs" class="anchor" href="#shimjs"><span class="octicon octicon-link"></span></a><code>shim.js</code>
+</h4>
+
+<div class="highlight highlight-js"><pre><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s1">'../vendor/x.js'</span>    <span class="o">:</span>  <span class="s1">'$'</span><span class="p">,</span>
+  <span class="s1">'../vendor/x-ui.js'</span> <span class="o">:</span>  <span class="p">{</span> <span class="s1">'depends'</span><span class="o">:</span> <span class="p">{</span> <span class="s1">'../vendor/x.js'</span><span class="o">:</span> <span class="kc">null</span> <span class="p">}</span> <span class="p">},</span>
+  <span class="s1">'../vendor/y.js'</span>    <span class="o">:</span>  <span class="p">{</span> <span class="s1">'exports'</span><span class="o">:</span> <span class="s1">'Y'</span><span class="p">,</span> <span class="s1">'depends'</span><span class="o">:</span> <span class="p">{</span> <span class="s1">'../vendor/x.js'</span><span class="o">:</span> <span class="s1">'$'</span> <span class="p">}</span> <span class="p">},</span>
+  <span class="s1">'../vendor/z.js'</span>    <span class="o">:</span>  <span class="p">{</span> <span class="s1">'exports'</span><span class="o">:</span> <span class="s1">'zorro'</span><span class="p">,</span> <span class="s1">'depends'</span><span class="o">:</span> <span class="p">{</span> <span class="s1">'../vendor/x.js'</span><span class="o">:</span> <span class="s1">'$'</span><span class="p">,</span> <span class="s1">'../vendor/y.js'</span><span class="o">:</span> <span class="s1">'YNOT'</span> <span class="p">}</span> <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p><strong>Note:</strong> all paths are relative to <code>./config/shim.js</code> instead of the <code>package.json</code>.</p>
+
+<p>The main difference to <code>a)</code> is the <code>depends</code> field specification. Instead it being an array of strings it expresses its dependencies as a hashmap:</p>
+
+<ul>
+<li>
+<strong>key:</strong> <code>path-to-file</code> </li>
+<li>
+<strong>value:</strong>  the name under which it is expected to be attached on the window</li>
+</ul><h2>
+<a name="more-examples" class="anchor" href="#more-examples"><span class="octicon octicon-link"></span></a>More Examples</h2>
+
+<ul>
+<li><a href="https://github.com/thlorenz/browserify-shim/tree/master/examples/shim-jquery">shim-jquery</a></li>
+<li><a href="https://github.com/thlorenz/browserify-expose/tree/master/examples/expose-jquery">expose-jquery</a></li>
+<li><a href="https://github.com/thlorenz/browserify-shim/tree/master/examples/shim-jquery-external">shim-jquery-external</a></li>
+<li>the <a href="https://github.com/thlorenz/browserify-shim/tree/master/test">tests</a> are a great resource to investigate the
+different ways to configure shims and to understand how shims are applied to packages found inside the <code>node_modules</code>
+of your package</li>
+</ul><p><a href="https://bitdeli.com/free" title="Bitdeli Badge"><img src="https://d2weczhvl823v0.cloudfront.net/thlorenz/browserify-shim/trend.png" alt="Bitdeli Badge"></a></p>
+      </section>
+
+      <footer>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/thlorenz">thlorenz</a> can be found on <a href="https://github.com/thlorenz/browserify-shim">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
+      </footer>
+
+    </div>
+
+    
+  </body>
+</html>
