@@ -27,7 +27,7 @@ function bundleNcheck(relPath, t) {
         ctx.self = ctx.window;
         var require_ = vm.runInNewContext(src, ctx);
         
-        var main = require_(require.resolve(relPath));
+        var main = require_(require.resolve(relPathCpy));
 
         t.deepEqual(
             main

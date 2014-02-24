@@ -20,6 +20,7 @@ test('\nresolving a bower component that is shimmed', function (t) {
     resolve(require.resolve('./bower-copy/components/jquery-ui/ui/jquery.ui.position.js'), msgs, function (err, res) {
       rmrf.sync(path.join(__dirname, 'bower-copy'));
 
+      inspect(msgs);
       if (err) { t.fail(err); return t.end(); }
       t.deepEqual(res.shim, { exports: null, depends: { jquery: 'jQuery' } }, 'resolves shim correctly')
       t.end();
