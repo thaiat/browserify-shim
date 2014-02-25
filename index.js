@@ -7,8 +7,8 @@ var util         =  require('util')
   , path         =  require('path')
   , through      =  require('through')
   , resolveShims =  require('./lib/resolve-shims')
+  , derequire    =  require('./lib/derequire')
   , debug        =  require('./lib/debug')
-  ;
 
 function requireDependencies(depends, packageRoot, browserAliases, dependencies) {
   if (!depends) return '';
@@ -122,9 +122,14 @@ module.exports = function (file) {
         content = exposify.expose(eg, content);
       }
 
-      var transformed = info.shim ? wrap(content, info.shim, info.packageDir, info.browser) : content;
+      if (info.shim) { 
+        content = derequire(content);
+        var transformed = wrap(content, info.shim, info.packageDir, info.browser)
+        stream.queue(transformed);
+      } else { 
+        stream.queue(content);
+      }
 
-      stream.queue(transformed);
       stream.queue(null);
     });
   }
